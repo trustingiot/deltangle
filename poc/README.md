@@ -20,9 +20,11 @@
     mkdir <webserver>/deltangle
     mkdir <webserver>/deltangle/css
     mkdir <webserver>/deltangle/js
+    mkdir <webserver>/deltangle/img
     cp web.html <webserver>/deltangle/
     cp css/* <webserver>/deltangle/css/
     cp js/* <webserver>/deltangle/js/
+    cp img/* <webserver>/deltangle/img/
 
 2.Copy libs to your webserver folder
 

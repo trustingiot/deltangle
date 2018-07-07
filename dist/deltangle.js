@@ -9,6 +9,10 @@ class Deltangle {
 		let promise = (h) => new Promise((resolve) => this.iota.api.getBundle(h, (a, b) => resolve(b)))
 		let result = await promise(hash)
 		let content = await this.extractContent(result)
+		if (content == undefined) {
+			let result = await this.getVersion(hash)
+			content = result
+		}
 		return content
 	}
 
@@ -43,6 +47,8 @@ class Deltangle {
 			view = await this.maia.createView(maia, 'file')
 			payload = {data: {view: view}}
 			await this.maia.post(payload, seed)
+		} else {
+			view = view.data.view
 		}
 		return {seed: seed, view: view}
 	}

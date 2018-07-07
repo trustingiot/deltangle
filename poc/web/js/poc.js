@@ -2,14 +2,12 @@
 // Javascript functions for PoC website
 //
 const defaultNode = 'https://iotanode.be:443'
-const defaultDepth = 14
-const defaultMWM = 1
+const defaultDepth = 9
+const defaultMWM = 14
 
-const inputs = ['seed', 'maia']
 const date = '2018.07.07'
 
 let forms = ['save', 'update', 'version', 'obtain']
-let request = {seed:'', maia:''}
 let node = null
 let selectedForm
 let instance
@@ -194,8 +192,6 @@ function controlDo() {
 
 	case 'version':
 		enabled = iotaWrapper.valid.isAddress(document.getElementById('bundle-version').value)
-		// TODO promisify maia
-		enabled = false
 		break
 
 	case 'obtain':
