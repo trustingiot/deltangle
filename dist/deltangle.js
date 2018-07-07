@@ -1,57 +1,37 @@
 class Deltangle {
+
 	constructor(obj) {
-		this.maia = new MAIA(obj)
+		this.maia = new Deltangle.MAIACLASS(obj)
 		this.iota = this.maia.iota
 	}
 
-	async get(hash, callback) {
-		if (isNode()) {
-			let result = await promisify(this.iota.api.getBundle.bind(this.iota.api))(hash)
-			let content = await this.extractContent(result)
-			return content
-
-		} else {
-			// TODO promisify browser execution
-			this.iota.api.getBundle(hash, async (error, bundle) => {
-				if (error) {
-					return error
-
-				} else {
-					let result = await this.extractContent(bundle)
-					if (typeof callback === 'function') {
-						return callback(result)
-					}
-					return undefined
-				}
-			})
-		}
+	async get(hash) {
+		let promise = (h) => new Promise((resolve) => this.iota.api.getBundle(h, (a, b) => resolve(b)))
+		let result = await promise(hash)
+		let content = await this.extractContent(result)
+		return content
 	}
 
-	async post(content, previous = null, callback) {
+	async post(content, previous = null) {
 		if (previous != null) {
 			let previousContent = await this.get(previous)
-			content = jsdiff.createPatch('', previousContent, content, '', '', { context: 1 })
+			content = JsDiff.createPatch('', previousContent, content, '', '', { context: 1 })
 		}
 		let message = {content: content, previous: previous}
 		let trytes = this.iota.utils.toTrytes(JSON.stringify(message))
 		let tokens = trytes.match(/.{1,2187}/g)
 		let transfers = []
 		for (var i = 0; i < tokens.length; i++) {
-			transfers.push({address: MAIA.keyGen(), value: 0, message: tokens[i]})
+			transfers.push({address: Deltangle.MAIACLASS.keyGen(), value: 0, message: tokens[i]})
 		}
 
-		if (isNode()) {
-			let result = await promisify(this.iota.api.sendTransfer.bind(this.iota.api))('', this.maia.depth, this.maia.mwm, transfers)
-			return result[0].hash
-
-		} else {
-			// TODO promisify browser execution
-			this.iota.api.sendTransfer('', this.depth, this.mwm, transfers, callback)
-		}
+		let promise = (t) => new Promise((resolve) => this.iota.api.sendTransfer('', this.maia.depth, this.maia.mwm, t, (a, b) => resolve(b)))
+		let result = await promise(transfers)
+		return result[0].hash
 	}
 
-	async setVersion(hash, seed = MAIA.keyGen()) {
-		let maia = MAIA.generateMAIA(seed)
+	async setVersion(hash, seed = Deltangle.MAIACLASS.keyGen()) {
+		let maia = Deltangle.MAIACLASS.generateMAIA(seed)
 		let view = await this.maia.get(maia)
 		let payload = {
 			data: {
@@ -80,12 +60,22 @@ class Deltangle {
 			if (message.content !== undefined) {
 				if (message.previous != null) {
 					let result = await this.get(message.previous)
-					return jsdiff.applyPatch(result, message.content)
+					return JsDiff.applyPatch(result, message.content)
 				}
 				return message.content
 			}
 		}
+
 		return undefined
+	}
+
+	// TODO fix this
+	static get MAIACLASS() {
+		if (isNode()) {
+			return MAIANODE
+		} else {
+			return MAIA
+		}
 	}
 }
 
@@ -95,15 +85,14 @@ function isNode() {
 
 // Backend
 if (isNode()) {
-	var {promisify} = require('util')
 	var IOTA = require('iota.lib.js')
-	var MAIA = require('../lib/maia.js').MAIA
-	var jsdiff = require('diff')
+	var MAIANODE = require('../lib/maia.js').MAIA
+	var JsDiff = require('diff')
 
 	exports.IOTA = IOTA
 	exports.Deltangle = Deltangle
 
 // Frontend
 } else {
-	// TODO Frontend
+	window.Deltangle = Deltangle
 }

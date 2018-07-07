@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Deltangle PoC</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+	<script type="text/javascript" src="./../../lib/iota.min.js"></script>
+	<script type="text/javascript" src="./../../lib/mam.web.js"></script>
+	<script type="text/javascript" src="./../../lib/maia.js"></script>
+	<script type="text/javascript" src="./../../dist/deltangle.js"></script>
+	<script type="text/javascript" src="js/poc.js"></script>
+	<script type="text/javascript" src="js/diff.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/node-forge@0.7.0/dist/forge.min.js"></script>
+
+	<link rel="stylesheet" href="css/poc.css" />
+</head>
+
+<body onload="afterLoad();">
+	<nav class="navbar navbar-expand-sm bg-dark navbar-dark sticky-top">
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="collapsibleNavbar">
+			<ul class="navbar-nav">
+				<li class="nav-item active">
+					<a class="nav-link" href="#">PoC of Deltangle</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="https://github.com/trustingiot/deltangle" target="_blank">Source Code</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="https://trustingiot.com/about" target="_blank">Collaborate</a>
+				</li>
+			</ul>
+		</div>
+	</nav>
+
+	<div class="jumbotron text-center mb-3">
+		<h1>Deltangle</h1>
+		<h2>Store and update text files in the tangle</h2>
+	</div>
+
+	<div class="container">
+		<div class="alert alert-danger alert-dismissible">
+			<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+			This is a proof of concept.<br>
+			Inputs are not validated.<br>
+			Only tested in chrome.
+		</div>
+
+		<form>
+			<div class="input-group mb-1">
+				<div class="input-group-prepend">
+					<label class="input-group-text" for="node">Node</label>
+				</div>
+				<input class="form-control" id="node" type="text" placeholder="IOTA node">
+			</div>
+
+			<div class="input-group mb-1">
+				<div class="input-group-prepend">
+					<label class="input-group-text" for="depth">Depth</label>
+				</div>
+				<input class="form-control" id="depth" type="number" value="1" min="1" max="100" step="1">
+			</div>
+
+			<div class="input-group mb-3">
+				<div class="input-group-prepend">
+					<label class="input-group-text" for="mwm">MWM</label>
+				</div>
+				<input class="form-control" id="mwm" type="number" value="1" min="1" max="100" step="1">
+			</div>
+
+			<div id="selector">
+
+				<div class="text-center mb-2 mt-3">
+					<div class="btn-group">
+						<button type="button" id="button-save" class="btn btn-outline-secondary" onclick="setForm('save')">SAVE</button>
+						<button type="button" id="button-update" class="btn btn-outline-secondary" onclick="setForm('update')">UPDATE</button>
+						<!-- TODO promisify maia -->
+						<button type="button" id="button-version" class="btn btn-outline-secondary" disabled onclick="setForm('version')">VERSION</button>
+						<button type="button" id="button-obtain" class="btn btn-outline-secondary" onclick="setForm('obtain')">OBTAIN</button>
+					</div>
+				</div>
+
+				<div id="form-save">
+					<div class="input-group mb-1">
+						<input class="form-control" id="file-save" accept="text/*" type="file" onchange="handleFile(this.files, 'fSave')">
+					</div>
+
+					<div class="row">
+						<div id="fSaveContainer" class="col-md-12">
+							<textarea readonly id="fSave" name="fSave"></textarea>
+						</div>
+					</div>
+
+				</div>
+
+				<div id="form-update">
+					<div class="input-group mb-1">
+						<div class="input-group-prepend">
+							<label class="input-group-text" for="bundle-update">Hash</label>
+						</div>
+						<input class="form-control" id="bundle-update" type="text" placeholder="Hash of a transaction of the file to update" oninput="controlDo()">
+					</div>
+
+					<div class="input-group mb-1">
+						<input class="form-control" id="file-update" accept="text/*" type="file" onchange="handleFile(this.files, 'fUpdate')">
+					</div>
+
+					<div class="row">
+						<div id="fUpdateContainer" class="col-md-12">
+							<textarea readonly id="fUpdate" name="fUpdate"></textarea>
+						</div>
+					</div>
+					
+				</div>
+
+				<div id="form-version">
+					<div class="input-group mb-1">
+						<div class="input-group-prepend">
+							<label class="input-group-text" for="bundle-version">Hash</label>
+						</div>
+						<input class="form-control" id="bundle-version" type="text" placeholder="Hash of a transaction of the file" oninput="controlDo()">
+					</div>
+
+					<div class="input-group mb-1">
+						<div class="input-group-prepend">
+							<label class="input-group-text" for="seed">Seed</label>
+						</div>
+						<input class="form-control" id="seed" type="text" placeholder="Seed used. If it is not specified it is created randomly">
+						<div class="input-group-append">
+							<button class="btn btn-outline-secondary" type="button" onclick="random('seed')">Random</button>
+						</div>
+					</div>
+				</div>
+
+				<div id="form-obtain">
+					<div class="input-group mb-1">
+						<div class="input-group-prepend">
+							<label class="input-group-text" for="bundle-obtain">Hash</label>
+						</div>
+						<input class="form-control" id="bundle-obtain" type="text" placeholder="Hash of the content" oninput="controlDo()">
+					</div>
+				</div>
+
+			</div>
+
+		</form>
+
+		<div class="text-center mb-3 mt-2">
+			<div class="btn-group">
+				<button type="button" class="btn btn-outline-secondary" id="button-do" onclick=execute()>DO</button>
+				<button type="button" class="btn btn-outline-secondary" id="button-clean" onclick=clean()>CLEAN</button>
+			</div>
+		</div>
+
+		<div class="row">
+			<div id="console-container" class="col-md-12">
+				<textarea readonly id="console" name="console"></textarea>
+				<div id="loader"></div>
+				<div id="timer"></div>
+			</div>
+		</div>
+
+	</div>
+
+	<footer class="page-footer font-small">
+		<div class="footer-copyright text-center py-3">© <span id='info-date'></span> Deltangle<br><a href="https://ecosystem.iota.org/projects/deltangle" target="_blank">An IOTA ecosystem project</a></div>
+	</footer>
+</body>
+</html>
