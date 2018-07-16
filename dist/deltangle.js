@@ -16,7 +16,8 @@ class Deltangle {
 		return content
 	}
 
-	async post(content, previous = null) {
+        async post(content, previous = null) {
+	        this.iota.api.getNodeInfo((err,sucess) => { if(err) throw("\nApi not working; Connect to a diffierent host.") })
 		if (previous != null) {
 			let previousContent = await this.get(previous)
 			content = JsDiff.createPatch('', previousContent, content, '', '', { context: 1 })
