@@ -24,7 +24,10 @@ function getInstance() {
 }
 
 async function save() {
-	let content = await fs.readFileSync(arg.save, 'ascii')
+        let content = arg.save
+        if (fs.existsSync(arg.save)){
+        	let content = await fs.readFileSync(arg.save, 'ascii')
+        }
 	let instance = getInstance()
 	let hash = undefined
 	if (arg.hash) {
