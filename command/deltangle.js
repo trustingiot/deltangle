@@ -69,7 +69,7 @@ if (arg.save) {
 	console.log('  --channelLayers layers\n      Channel layers used for versions. Default: ' + defaultChannelLayers)
 	console.log('  --channelDepth depth\n      Channel depth used for versions. Default: ' + defaultChannelDepth)
 	console.log('\nand <command> is one of:')
-	console.log('  --save <file> [--hash hash]\n      Save a file. Add --hash with a given hash to save difference with the previous one')
+	console.log('  --save <file or text> [--hash hash]\n      Save a file or a string of text. Add --hash with a given hash to save difference with the previous one')
 	console.log('  --obtain hash\n      Get a file')
 	console.log('  --version hash [--seed seed]\n      Create or update a version. Add --seed to update a version or create a new version using this seed')
 }
