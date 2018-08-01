@@ -24,10 +24,10 @@ function getInstance() {
 }
 
 async function save() {
-        let content = arg.save
-        if (fs.existsSync(arg.save)){
-        	let content = await fs.readFileSync(arg.save, 'ascii')
-        }
+	let content = arg.save
+	if (fs.existsSync(arg.save)){
+		content = await fs.readFileSync(arg.save, 'ascii')
+	}
 	let instance = getInstance()
 	let hash = undefined
 	if (arg.hash) {
@@ -40,17 +40,22 @@ async function save() {
 
 async function obtain() {
 	let instance = getInstance()
-	let content = await instance.get(arg.obtain)
+	let message = (arg.log) ? '*' : ((arg.message) ? arg.message : null)
+	let content = await instance.get(arg.obtain, message)
 	console.log(content)
 }
 
 async function version() {
 	let instance = getInstance()
 	let result = undefined
+	if (!arg.message) {
+		console.log('Undefined message')
+		process.exit()
+	}
 	if (arg.seed) {
-		result = await instance.setVersion(arg.version, arg.seed)
+		result = await instance.setVersion(arg.version, arg.message, arg.seed)
 	} else {
-		result = await instance.setVersion(arg.version)
+		result = await instance.setVersion(arg.version, arg.message)
 	}
 	console.log(result)
 }
@@ -63,13 +68,27 @@ if (arg.save) {
 	version()
 } else {
 	console.log('Usage: deltangle [options] <command>')
-	console.log('\nwhere [options] can be zero or more of the following arguments:')
-	console.log('  --provider provider\n      Provider. Default: ' + defaultProvider)
-	console.log('  --mwm mwm\n      MWM. Default: ' + defaultMWM)
-	console.log('  --channelLayers layers\n      Channel layers used for versions. Default: ' + defaultChannelLayers)
-	console.log('  --channelDepth depth\n      Channel depth used for versions. Default: ' + defaultChannelDepth)
-	console.log('\nand <command> is one of:')
-	console.log('  --save <file or text> [--hash hash]\n      Save a file or a string of text. Add --hash with a given hash to save difference with the previous one')
-	console.log('  --obtain hash\n      Get a file')
-	console.log('  --version hash [--seed seed]\n      Create or update a version. Add --seed to update a version or create a new version using this seed')
+	console.log('')
+	console.log('where [options] can be zero or more of the following arguments:')
+	console.log('  --provider provider')
+	console.log('      Provider. Default: ' + defaultProvider)
+	console.log('  --mwm mwm')
+	console.log('      MWM. Default: ' + defaultMWM)
+	console.log('  --channelLayers layers')
+	console.log('      Channel layers used for versions. Default: ' + defaultChannelLayers)
+	console.log('  --channelDepth depth')
+	console.log('      Channel depth used for versions. Default: ' + defaultChannelDepth)
+	console.log('')
+	console.log('and <command> is one of:')
+	console.log('  --save <file or text> [--hash hash]')
+	console.log('      Save a file or a string of text')
+	console.log('            Add --hash with a given hash to save difference with the previous one')
+	console.log('  --obtain hash [--log] [--message message]')
+	console.log('      Get a file')
+	console.log('            Add --log to list versions if it is a versioned file')
+	console.log('            Add --message to obtain a given version if it is a versioned file')
+	console.log('            Note: If it is a versioned file and neither --log nor --message are specified, the most recent version is returned')
+	console.log('  --version hash --message message [--seed seed]')
+	console.log('      Create or update a version')
+	console.log('            Add --seed to update a version or create a new version using this seed')
 }

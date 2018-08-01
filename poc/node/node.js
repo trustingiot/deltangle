@@ -36,7 +36,7 @@ async function test() {
 
 	// Create version
 	console.debug('Creating version using f1')
-	var ref = await instance.setVersion(hash1)
+	var ref = await instance.setVersion(hash1, 'version 1')
 	let version = await instance.getVersion(ref.view)
 	console.debug('Done')
 
@@ -46,7 +46,7 @@ async function test() {
 	}
 
 	console.debug('Updating version using f2')
-	await instance.setVersion(hash2, ref.seed)
+	await instance.setVersion(hash2, 'version 2', ref.seed)
 	version = await instance.getVersion(ref.view)
 	console.debug('Done')
 
