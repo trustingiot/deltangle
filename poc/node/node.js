@@ -5,7 +5,7 @@ let Deltangle = require('../../dist/deltangle.js').Deltangle
 let fs = require('fs')
 
 // TODO Set configuration
-let provider = 'https://iotanode.be:443'
+let provider = 'https://node.iota.moe:443'
 let mwm = 14
 let channelLayers = 1
 let channelDepth = 20

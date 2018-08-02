@@ -131,6 +131,13 @@
 
 					<div class="input-group mb-1">
 						<div class="input-group-prepend">
+							<label class="input-group-text" for="message-version">Message</label>
+						</div>
+						<input class="form-control" id="message-version" type="text" placeholder="Message of the version" oninput="controlDo()">
+					</div>
+
+					<div class="input-group mb-1">
+						<div class="input-group-prepend">
 							<label class="input-group-text" for="seed">Seed</label>
 						</div>
 						<input class="form-control" id="seed" type="text" placeholder="Seed used. If it is not specified it is created randomly">
@@ -146,6 +153,13 @@
 							<label class="input-group-text" for="bundle-obtain">Hash</label>
 						</div>
 						<input class="form-control" id="bundle-obtain" type="text" placeholder="Hash of the content" oninput="controlDo()">
+					</div>
+
+					<div class="input-group mb-1">
+						<div class="input-group-prepend">
+							<label class="input-group-text" for="message-obtain">Message</label>
+						</div>
+						<input class="form-control" id="message-obtain" type="text" placeholder="Message to obtain if it is a version. Empty value to retrieve the last, '*' to obtain the full list" oninput="controlDo()">
 					</div>
 				</div>
 

@@ -5,7 +5,7 @@ let Deltangle = require('./lib/deltangle.js').Deltangle
 let fs = require('fs')
 let arg = require('minimist')(process.argv.slice(2))
 
-const defaultProvider = 'https://iotanode.be:443'
+const defaultProvider = 'https://node.iota.moe:443'
 const defaultMWM = 14
 const defaultChannelLayers = 1
 const defaultChannelDepth = 20

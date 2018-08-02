@@ -1,11 +1,11 @@
 //
 // Javascript functions for PoC website
 //
-const defaultNode = 'https://iotanode.be:443'
+const defaultNode = 'https://node.iota.moe:443'
 const defaultDepth = 9
 const defaultMWM = 14
 
-const date = '2018.07.07'
+const date = '2018.08.02'
 
 let forms = ['save', 'update', 'version', 'obtain']
 let node = null
@@ -43,6 +43,9 @@ async function getDeltangle() {
 async function execute(action) {
 	let deltangle = await getDeltangle()
 	let value = undefined
+	let hash = undefined
+	let message = undefined
+	let seed = undefined
 	switch (selectedForm) {
 	case 'save':
 		initRequest()
@@ -63,9 +66,10 @@ async function execute(action) {
 	case 'version':
 		initRequest()
 		setInputValue('console', 'Updating version\n')
-		let seed = document.getElementById('seed').value
+		message = document.getElementById('message-version').value
+		seed = document.getElementById('seed').value
 		seed = iotaWrapper.valid.isAddress(seed) ? seed : Deltangle.MAIACLASS.keyGen()
-		value = await deltangle.setVersion(document.getElementById('bundle-version').value, seed)
+		value = await deltangle.setVersion(document.getElementById('bundle-version').value, message, seed)
 		appendInputValue('console', 'Seed: ' + value.seed + '\nHash: ' + value.view)
 		finishRequest()
 		break
@@ -73,7 +77,15 @@ async function execute(action) {
 	case 'obtain':
 		initRequest()
 		setInputValue('console', 'Obtaining content\n')
-		value = await deltangle.get(document.getElementById('bundle-obtain').value)
+		hash = document.getElementById('bundle-obtain').value
+		message = document.getElementById('message-obtain').value
+		message = (message != '') ? message : null
+		value = await deltangle.get(hash, message)
+		if (value === undefined) {
+			value = 'Not found'
+		} else if (value instanceof Array) {
+			value = JSON.stringify(value)
+		}
 		setInputValue('console', value)
 		finishRequest()
 		break
@@ -82,7 +94,7 @@ async function execute(action) {
 
 // Clean contents
 function clean() {
-	let inputs = ['file-save', 'file-update', 'bundle-update', 'bundle-version', 'bundle-obtain', 'seed']
+	let inputs = ['file-save', 'file-update', 'bundle-update', 'bundle-version', 'bundle-obtain', 'message-version', 'message-obtain', 'seed']
 	for (var i in inputs) {
 		document.getElementById(inputs[i]).value = ''
 	}
@@ -191,7 +203,7 @@ function controlDo() {
 		break
 
 	case 'version':
-		enabled = iotaWrapper.valid.isAddress(document.getElementById('bundle-version').value)
+		enabled = iotaWrapper.valid.isAddress(document.getElementById('bundle-version').value) && (document.getElementById('message-version').value != '')
 		break
 
 	case 'obtain':
